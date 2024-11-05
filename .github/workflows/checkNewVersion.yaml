@@ -47,7 +47,7 @@ jobs:
               -H "Authorization: Bearer ${{ secrets.PAT }}" \
               -H "X-GitHub-Api-Version: 2022-11-28" \
               -d "{\"name\":\"HAPROXY_VERSION\",\"value\":\"${{ steps.run-container.outputs.LATEST_VERSION }}\"}" \
-              "https://api.github.com/repos/v6Org01/{{ env.APPLICATION }}/actions/variables/HAPROXY_VERSION"
+              https://api.github.com/repos/v6Org01/haproxy/actions/variables/HAPROXY_VERSION
           else
             echo "No new version found."
           fi
