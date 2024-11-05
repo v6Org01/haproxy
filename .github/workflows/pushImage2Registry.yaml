@@ -1,0 +1,76 @@
+name: push_image_to_registry
+
+env:
+  APPLICATION: haproxy
+
+on:
+  workflow_dispatch:
+  repository_dispatch:
+    types: [trigger-wf-pushImage2Registry]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+
+  build-image:
+    strategy:
+      matrix:
+        platform:
+          - amd64
+          - arm64
+        include:
+          - platform: amd64
+            runner: gha-runner-scale-set-amd64
+          - platform: arm64
+            runner: gha-runner-scale-set-arm64
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Login to public
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ vars.REGISTRY_PUBLIC }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.PAT_PACKAGES }}
+      - name: Build and push to public
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/${{ matrix.platform }}
+          file: src/docker/Dockerfile
+          push: true
+          cache-from: type=gha,scope=build-${{ env.APPLICATION }}-${{ matrix.platform }}
+          cache-to: type=gha,mode=max,scope=build-${{ env.APPLICATION }}-${{ matrix.platform }}
+          provenance: false
+          tags: |
+            "${{ vars.REGISTRY_PUBLIC }}/${{ github.repository_owner }}/arc-${{ env.APPLICATION }}:${{ vars.HAPROXY_VERSION }}-${{ matrix.platform }}"
+
+  build-merge:
+    runs-on: gha-runner-scale-set-arm64
+    needs: build-image
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Login to public registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ vars.REGISTRY_PUBLIC }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.PAT_PACKAGES }}
+      - name: Create manifest list and push
+        run: |
+          docker buildx imagetools create -t "${{ vars.REGISTRY_PUBLIC }}/${{ github.repository_owner }}/arc-${{ env.APPLICATION }}:${{ vars.HAPROXY_VERSION }}" \
+            "${{ vars.REGISTRY_PUBLIC }}/${{ github.repository_owner }}/arc-${{ env.APPLICATION }}:${{ vars.HAPROXY_VERSION }}-amd64" \
+            "${{ vars.REGISTRY_PUBLIC }}/${{ github.repository_owner }}/arc-${{ env.APPLICATION }}:${{ vars.HAPROXY_VERSION }}-arm64"
+      - name: Inspect image
+        run: |
+          docker buildx imagetools inspect "${{ vars.REGISTRY_PUBLIC }}/${{ github.repository_owner }}/arc-${{ env.APPLICATION }}:${{ vars.HAPROXY_VERSION }}"

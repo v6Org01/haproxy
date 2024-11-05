@@ -53,8 +53,8 @@ jobs:
               -H "Accept: application/vnd.github+json" \
               -H "Authorization: Bearer ${{ secrets.PAT_DEFAULT }}" \
               -H "X-GitHub-Api-Version: 2022-11-28" \
-              -d "{\"event_type\":\"trigger-wf-pushImage2Registry\"}" \
-              https://api.github.com/repos/v6Org01/haproxy/dispatches
+              -d "{\"event_type\":\"trigger-wf-\"}" \
+              https://api.github.com/repos/v6Org01/duoauthproxy/dispatches
           else
             echo "No new version found."
           fi
