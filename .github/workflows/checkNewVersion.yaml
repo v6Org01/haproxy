@@ -15,7 +15,7 @@ concurrency:
 jobs:
   check-version:
     runs-on:
-      - gha-runner-scale-set-amd64
+      - gha-runner-scale-set-arm64
     steps:
       - name: Checkout
         uses: actions/checkout@v4
