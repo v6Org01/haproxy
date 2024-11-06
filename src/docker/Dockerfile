@@ -1,4 +1,4 @@
-FROM alpine:latest
+FROM public.ecr.aws/docker/library/alpine:latest
 LABEL maintainer="dev_lau11@a.jlv6.com"
 LABEL os="alpine"
 RUN apk --update -t add --no-cache haproxy curl libcap iproute2 && \
