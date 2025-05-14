@@ -1,2 +1,4 @@
 # Format: <hostname>       <backend>
+immmm52.jlv6.com           nginx-proxy-443
+oooc9431.jlv6.com          nginx-proxy-443
 test-proxy.jlv6.com        nginx-proxy-443

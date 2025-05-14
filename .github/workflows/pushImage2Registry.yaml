@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches: ["main"]
-    paths: ["haproxy.cfg"]
+    paths: ["haproxy.cfg", "sni-backend-443.map"]
   repository_dispatch:
     types: ["trigger-wf-pushImage2Registry"]
 
